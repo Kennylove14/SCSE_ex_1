@@ -1,3 +1,5 @@
+import re
+
 encoded = """
    !!junk-77!! | [3::DW::ok] | [xx::DRSC::bad] |
    [1::NFFU::ok] | ##nothing## | [5::TQI_QNGWFWD::ok] |
@@ -5,6 +7,27 @@ encoded = """
    [6::GZ_7_VS::ok] | [99::IGNORE_ME::bad] | %%noise%%
 """
 
+alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+fragments = re.findall(r"\[(\d+)::([A-Z0-9_]+)::(ok|bad)\]", encoded)
+
+decoded = []
+for number, text, status in fragments:
+    if status != "ok":
+        continue  
+    shifted = ""
+    for ch in text:
+        if ch in alphabet:
+            idx = (alphabet.index(ch) - int(number)) % 26
+            shifted += alphabet[idx]
+        else:
+            shifted += ch  
+    decoded.append((int(number), shifted))
+
+message_parts = [text for _, text in sorted(decoded)]
+message = " ".join(message_parts).replace("_", " ")
+
+print(message)
 ###############################################################
 """
 1. Part of the real message is inside the the '[' and ']' brackets.
@@ -16,6 +39,6 @@ Similarly, if the number is 5 and the jumbled message is ABC, then the actual me
 5. Once you have decoded all the fragments, combine them in the order of their numbers to get the final message. First comes the fragment with number 1, then 2, and so on.
 """
 
-alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
 
 
